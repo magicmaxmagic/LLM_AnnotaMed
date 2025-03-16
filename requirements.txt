@@ -6,6 +6,4 @@ torch >= 1.3
 evaluate==0.4.3
 transformers==4.48.2
 peft==0.14.0
-
-# Pour CUI -> TUI avec UMLS
 umls-api==0.1.0

@@ -119,7 +119,7 @@ class DataTrainingArguments:
 
     task_name: Optional[str] = field(default="ner", metadata={"help": "The name of the task (ner, pos...)."})
     dataset_name: Optional[str] = field(
-        default="conll2003", metadata={"help": "The name of the dataset to use (via the datasets library)."}
+        default="ibm-research/MedMentions-ZS", metadata={"help": "The name of the dataset to use (via the datasets library)."}
     )
     dataset_config_name: Optional[str] = field(
         default=None, metadata={"help": "The configuration name of the dataset to use (via the datasets library)."}
@@ -331,10 +331,13 @@ def main():
 
     if data_args.label_column_name is not None:
         label_column_name = data_args.label_column_name
-    elif f"{data_args.task_name}_tags" in column_names:
-        label_column_name = f"{data_args.task_name}_tags"
+    elif "ner_tags" in column_names:
+        label_column_name = "ner_tags"
     else:
         label_column_name = column_names[1]
+    print("============================================\n")
+    print(raw_datasets["train"])
+    print("\n============================================\n")
 
     # In the event the labels are not a `Sequence[ClassLabel]`, we will need to go through the dataset to get the
     # unique labels.
@@ -354,6 +357,13 @@ def main():
         label_to_id = {i: i for i in range(len(label_list))}
     else:
         label_list = get_label_list(raw_datasets["train"][label_column_name])
+        if "validation" in raw_datasets:
+            label_list += get_label_list(raw_datasets["validation"][label_column_name])
+        if "test" in raw_datasets:
+            label_list += get_label_list(raw_datasets["test"][label_column_name])
+        # Suppression des doublons
+        label_list = list(set(label_list))
+        # Création du dictionnaire de mapping label -> id
         label_to_id = {l: i for i, l in enumerate(label_list)}
 
     num_labels = len(label_list)
